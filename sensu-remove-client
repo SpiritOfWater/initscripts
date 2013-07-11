@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# chkconfig: 35 99 75
+# description: remove sensu client
+
+### BEGIN INIT INFO
+# Provides:       sensu-remove-client
+# Required-Start:
+# Required-Stop:  $network
+# Default-Start:  3 5
+# Default-Stop:   0 1 6
+# Description:    remove sensu client
+### END INIT INFO
+
+# Source function library
+. /etc/init.d/functions
+
+prog="sensu-remove-client"
+
+start() {
+  touch /var/lock/subsys/sensu-remove-client
+}
+
+stop() {
+    echo -n $"Stopping $prog: "
+    curl -XDELETE "http://somehost:4567/clients/`hostname`" > /dev/null 2>&1
+    RETVAL=$?
+    if [ "$RETVAL" == "0" ]; then
+      success
+    else
+      failure
+    fi
+    RETVAL=$?
+    echo
+}
+
+case "$1" in
+    start)
+        $1
+        ;;
+    stop)
+        $1
+        ;;
+    *)
+        echo $"Usage: $0 (start|stop)"
+        exit 2
+esac
+exit $RETVAL
